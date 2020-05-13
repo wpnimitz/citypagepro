@@ -2,6 +2,7 @@
 /*
    Plugin Name: City Page Pro
    Plugin URI: https://topresultsconsulting.com
+   Description: Helping agencies streamlined the process of templated content so that they can create faster website.
    Version: 1.5.7
    Author: Nimitz Batioco
    Author URI: https://wpnimitz.com
