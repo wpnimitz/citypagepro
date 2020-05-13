@@ -1,0 +1,164 @@
+.location-list ul {
+    padding: 0;
+}
+
+.location-list li {
+    list-style: none;
+    width: 99%;
+    display: inline-block;
+    margin-right: 1%;
+}
+
+.location-list .column-2 li {
+    width: 49%;
+    display: inline-block;
+    margin-right: 1%;
+}
+
+.location-list .column-3 li {
+    width: 32%;
+    display: inline-block;
+    margin-right: 1%;
+}
+
+.location-list .column-4 li {
+    width: 24%;
+    display: inline-block;
+    margin-right: 1%;
+}
+
+.location-list li a {
+    padding: 10px 15px;
+    display: block;
+    background: #f1f1f1;
+    margin-bottom: 5px;
+    color: #000;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.location-list li a:before {
+    font-family: etmodules;
+    content: "\e01d";
+    padding-right: 10px;
+}
+
+.et-icon:before,
+.cta-icon a:before {
+    font-family: etmodules;
+    color: inherit;
+    padding-right: 5px;
+    line-height: 1.2em;
+}
+
+.et-icon.phone:before,
+.cta-icon.phone a:before {
+    content: "\e090";
+}
+
+
+
+
+/** 
+START: FORM STYLING; 
+**/
+.gform_wrapper.webnotik-form form input[type=text] {
+    line-height: 2em;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    width: 100%;
+}
+
+/** Same Spacing for Forms **/
+.gform_wrapper.webnotik-form .sellerform input,
+.gform_wrapper.webnotik-form li {
+    margin-bottom: 10px;
+}
+
+
+/** Remove Extra Spacing for Gravity Form **/
+body .gform_wrapper.webnotik-form ul li.gfield {
+    margin-top: 0;
+    padding-right: 0;
+    flex: 1;
+}
+body .gform_wrapper.webnotik-form .top_label div.ginput_container {
+    margin-top: 0;
+}
+.gform_wrapper.webnotik-form li.hidden_label input {
+    margin-top: 0;
+}
+.webnotik-form .gform_footer.top_label {
+    padding: 0;
+    margin-top: 0;
+}
+
+
+/** Making Sure that the button goes 100% width of the current screen size **/
+.webnotik-form button {
+    width: 100%;
+}
+
+.gform_wrapper.webnotik-form .sellerform button {
+    line-height: 2em;
+    font-size: unset;
+}
+
+
+@media screen and (min-width: 921px) {
+    .inline-form .rf-optin-button,
+    .inline-form .gform_footer {
+        max-width: 300px;
+        width: 100%;
+    }
+
+    .inline-form .sellerform .optin,
+    .inline-form .sellerform .fields {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .gform_wrapper .gform_body {
+        width: 100%;
+        flex: 1;
+    }
+
+    .inline-form .gform_wrapper.webnotik-form .sellerform input,
+    .inline-form .gform_wrapper.webnotik-form li {
+        margin-right: 1%;
+    }
+        
+    .inline-form .sellerform .optin, .inline-form .sellerform .fields,
+    .inline-form .gform_wrapper .gform_wrapper form,
+    .inline-form .gform_wrapper .gform_wrapper form ul {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .inline-form .gform_wrapper .gform_wrapper form {
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .inline-form .gform_wrapper.webnotik-form .sellerform input,
+    .inline-form .gform_wrapper.webnotik-form li {
+        margin-bottom: 0;
+    }
+
+    .inline-form .gform_heading,
+    .inline-form .gform_heading span {
+        flex: 0 0 100%;
+        margin-bottom: 0 !important;
+    }
+
+}
+
+@media screen and (max-width: 980px) {
+    .et_pb_row {
+        padding-left: 3% !important;
+        padding-right: 3% !important;
+        width: 96% !important; 
+        box-sizing: border-box;
+        max-width: 1380px !important;
+    }
+}
