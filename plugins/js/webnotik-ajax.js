@@ -65,52 +65,16 @@ jQuery(document).ready(function( $ ) {
           }
         $( '.wda_color_picker' ).wpColorPicker(params);
     }
-	$("#get-cp").on("click", function(e) {
-        e.preventDefault();
-		console.log("get_city_pages");
-		var data = {
-            action: 'get_city_pages',
-            focus_key: 'We Buy Houses'
-        };
-        
-        var json_count = 0;
-        $.getJSON( get_city_pages_data.ajaxurl, data, function( json ) {
-        	$(".message").html("").attr("class", '').addClass("message");
-            if ( json.success ) {
-                json_data = json["data"]
-                console.log(json_data)
-                $.each(json_data, function(i, item) {
-                	json_count++;
-				    var city1 = $(".main-sub-keyword .k-main input").val()
-                    if(city1 == "") {
-                        $(".main-sub-keyword .k-main input").attr('value', item.PageName);
-                        $(".main-sub-keyword .k-value input").attr('value', item.PageURL);
-                    } else {
-                    	if( $("#extra-" + json_count).length ) {
-                    		//do nathing
-                    	} else {
-                    		$(".add-sub-keyword").trigger("click");
-                    	}
-                        $("#extra-" + json_count + " .k-main input").attr('value', item.PageName);
-                        $("#extra-" + json_count + " .k-value input").attr('value', item.PageURL);
-                    }
-                    $(".message").addClass("success").append("Added City #" + (i + 1) + ": " + item.PageName + " <br>");
-				});
-            } else {
-            	console.log(json.data);
-            }
-            console.log("json is still playing...")
-        } );
-	})
 
-    $(".clone-cp").on("click", function(e) {
+
+    $(".webnotik-re-wrapper").on("click", ".clone-cp", function(e) {
         e.preventDefault();
         $this = $(this);
         gUrl = $(this).closest(".keyword").find(".k-value input").val();
         gTitle = $(this).closest(".keyword").find(".k-main input").val();
         $target = $(this).closest('.keyword').attr('id');
 
-
+        rei_message_show("Trying to clone the page...", "warning");
 
         var data = {
             action: 'clone_city_page',
@@ -126,19 +90,25 @@ jQuery(document).ready(function( $ ) {
                 if ( json.success ) {
                     json_data = json["data"];
                     console.log(json_data);
-                    rei_message_show("Successfully clone city page. See new city details below", "success");
+                    rei_message_show("Successfully clone city page. See new city details below", "info");
 
-                    //let's create a new city page field
-                    $(".add-sub-keyword").trigger( "click" ); 
+
+                    //trigger a new city name and url box
+                    $(".add-sub-keyword").trigger( "click" );
+
+                    
                     //lets display the data
-                    get_extra_id = $(".main-sub-keyword").data("new");
+                    get_extra_id = $(".extra-keywords .keyword").length + 1;
                     $("#extra-" + get_extra_id + " .k-main input").val(json.data["post_title"])
                     $("#extra-" + get_extra_id + " .k-value input").val(json.data["post_name"])
+
+                    var msg = "You need to click Save Changes to reflect the changes you've made on this tab."
+                    $(".global.message").attr("class", "").addClass("message show " + extra_class).html(msg);
                 } else {
                     
                     var json_data = json.data;
                     $.each(json_data, function(i, item) {
-                        rei_message_show("See console log", "error");
+                        rei_message_show("Invalid URL", "error");
                     }); 
                 }
             } );
@@ -148,7 +118,7 @@ jQuery(document).ready(function( $ ) {
         
     });
 
-    $(".verify-cp").on("click", function(e) {
+    $(".webnotik-re-wrapper").on("click", ".verify-cp", function(e) {
         e.preventDefault();
 
         var url = $(this).closest('.input-group').find('input').attr('value');
@@ -156,7 +126,7 @@ jQuery(document).ready(function( $ ) {
         window.open( 'http://www.google.com/search?q="' + url + '"', '_blank');
     })
 
-    $(".visit-cp").on("click", function(e) {
+    $(".webnotik-re-wrapper").on("click", ".visit-cp", function(e) {
         e.preventDefault();
 
         var url = $(this).closest('.input-group').find('input').attr('value');
@@ -164,17 +134,23 @@ jQuery(document).ready(function( $ ) {
         window.open( url , '_blank');
     })
 
-	$(".rename-cp").on("click", function(e) {
+	$(".webnotik-re-wrapper").on("click", ".rename-cp", function(e) {
 		e.preventDefault();
         $this = $(this);
 		gUrl = $(this).closest(".keyword").find(".k-value input").val();
-		gTitle = $(this).closest(".keyword").find(".k-main input").val();
+        gTitle = $(this).closest(".keyword").find(".k-main input").val();
+        before_title = $(".before_title input").val();
+		after_title = $(".after_title input").val();
 		$target = $(this).closest('.keyword').attr('id');
+
+        rei_message_show("Trying to rename the page...", "warning");
 
 		var data = {
             action: 'rename_city_pages',
             given_url: gUrl,
-            given_title: gTitle
+            given_title: gTitle,
+            before_title : before_title,
+            after_title : after_title
         };
         $.getJSON( get_city_pages_data.ajaxurl, data, function( json ) {
         	$(".message").html("").attr("class", '').addClass("message");
@@ -207,12 +183,17 @@ jQuery(document).ready(function( $ ) {
         } );
     })
 
+    $(".generate-shortcode").on("click", function(e) {
+        e.preventDefault();
+        $(".generated-shortcode").addClass("notice notice-success is-dismissible").html("[realeflow_crm id='" + $("#account_id").val() + "' autoresponder='" + $("#assign_autoresponder").val() + "' redirect='" + $("#redirect_url").val() + "' contact='" + $("#contact_type").val() + "' button='" + $("#button_text").val() + "']");
+    })
+
     function rei_message_show(msg, extra_class) {
         $(".message").attr("class", "").addClass("message show " + extra_class).html(msg);
 
         setTimeout(function() {
           $(".message").removeClass('show');
-        }, 2500);
+        }, 10000);
     }
 
     $(".map-try").on("click", function(e) {
@@ -220,3 +201,10 @@ jQuery(document).ready(function( $ ) {
         $(".map-try-wrapper").html('<iframe src="https://www.google.com/maps/embed?pb=Kent,+OH" width="100%" height="300" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>');
     });
 });
+
+
+
+
+
+
+

@@ -3,7 +3,7 @@
    Plugin Name: City Page Pro
    Plugin URI: https://topresultsconsulting.com
    Description: Helping agencies streamlined the process of templated content so that they can create faster website.
-   Version: 1.5.7
+   Version: 1.5.15
    Author: Nimitz Batioco
    Author URI: https://wpnimitz.com
    License: GPL2
@@ -14,11 +14,14 @@
  */
 
 // include_once("plugins/webnotik.php");
+include_once("includes/updates.php");
 include_once("plugins/toolbox.php"); 
 include_once("plugins/shortcode.php");
 include_once("plugins/metabox.php");
+include_once("plugins/ccp-child.php");
 include_once("includes/comparison.php");
-//include_once("includes/crm-realeflow.php");
+include_once("includes/crm-realeflow.php");
+
 
 define( 'CITYPRO_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CITYPRO_URL', plugin_dir_url( __FILE__ ) );
@@ -29,10 +32,16 @@ function custom_assets() {
 	wp_enqueue_style( 'app-style', CITYPRO_URL . '/assets/css/app-style.css', '', $ver ); // already remove the uncessary css
 
 	$branding = get_option('branding');
-	$allow = $branding["allow_use_of_branding"];
+
+	$allow = "no";
+	if(isset($branding["allow_use_of_branding"])){
+		$allow = "yes";
+	}
 	if($allow == "yes") {		
 		wp_enqueue_style( 'rei-style', CITYPRO_URL . '/assets/css/rei-style.css', '', $ver ); // already remove the uncessary css
 	}
+
+	//wp_enqueue_script( 'ccp-js', CITYPRO_URL . '/js/citypagepro.js', array( '' ), $ver, true );
     
 }
 

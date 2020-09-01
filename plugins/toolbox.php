@@ -1,7 +1,9 @@
 <?php
-$tabs = array('Branding', 'Forms', 'City Pages', 'Help & Guidelines', 'Reports');
 include_once('toolbox-config.php');
 
+function ccp_tabs() {
+	return array('Branding', 'City Pages', 'Forms', 'Others', 'Shortcodes', 'Reports');
+}
 
 // Enqueue the script on the back end (wp-admin)
 add_action( 'admin_enqueue_scripts', 'toolbox_admin_scripts_assets' );
@@ -19,7 +21,7 @@ function toolbox_admin_scripts_assets() {
 
 add_action('admin_menu', 'toolbox_admin_menu_999');
 function toolbox_admin_menu_999() {
-	global $tabs;
+	$tabs = ccp_tabs();
     add_menu_page( __('City Page Pro', 'citypage-pro'), __('City Page Pro', 'citypage-pro'), 'manage_options', 'toolbox-general', 'show_toolbox_content_callback', 'dashicons-flag', 3);
     add_action( 'admin_init', 'toolbox_settings' );
 
@@ -29,7 +31,7 @@ function toolbox_admin_menu_999() {
     }
 }
 function toolbox_settings() {
-	global $tabs;
+	$tabs = ccp_tabs();
 	//for general settings since its not part of the loop
 	register_setting( 'toolbox-general-group', 'general' );
 	for ($i=0; $i < count($tabs); $i++) {
@@ -42,7 +44,7 @@ function toolbox_settings() {
 add_action( 'wp_before_admin_bar_render', 'toolbox_admin_bar_render' );
 function toolbox_admin_bar_render() {
     global $wp_admin_bar;
-    global $tabs;
+    $tabs = ccp_tabs();
     // we can remove a menu item, like the Comments link, just by knowing the right $id
     // $wp_admin_bar->remove_menu('comments');
 
@@ -63,17 +65,20 @@ function toolbox_admin_bar_render() {
 	    )
 	);
 
-	for ($i=0; $i < count($tabs); $i++) {
-		$link =  'toolbox-' . toolbox_create_slug($tabs[$i]);
-		$wp_admin_bar->add_menu(
-			array(
-		    	'parent' => 'toolbox-general',
-		        'id' => $link . '-submenu',
-		        'title' => __($tabs[$i]),
-		        'href' => admin_url( 'admin.php?page=' . $link )
-		    )
-		);
+	if(is_array($tabs)) {
+		for ($i=0; $i < count($tabs); $i++) {
+			$link =  'toolbox-' . toolbox_create_slug($tabs[$i]);
+			$wp_admin_bar->add_menu(
+				array(
+			    	'parent' => 'toolbox-general',
+			        'id' => $link . '-submenu',
+			        'title' => __($tabs[$i]),
+			        'href' => admin_url( 'admin.php?page=' . $link )
+			    )
+			);
+		}
 	}
+	
 }
 
 
@@ -117,20 +122,23 @@ function rename_city_pages_callback() {
 	$page = get_page_by_path( $slug );
 	$mypost_id = $page->ID;
 	$new_title = $_REQUEST["given_title"];
+	$before_title = $_REQUEST["before_title"];
+	$after_title = $_REQUEST["after_title"];
 
 	if($mypost_id > 0) {
 		// Let's Update the Post
+		$new_post_title = $before_title . ' ' . $new_title . $after_title;
 		$my_post = array(
 			'ID'           => $mypost_id,
-			'post_title'   => 'We Buy Houses in ' . $new_title,
-			'post_name'	   => str_replace(" ", "-", strtolower('We Buy Houses ' . $new_title)) 
+			'post_title'   => $new_post_title,
+			'post_name'	   => str_replace(" ", "-", strtolower($new_post_title)) 
 		);
 
 		// Update the post into the database
 		wp_update_post( $my_post );
 		update_post_meta($mypost_id, 'city_keyword', $new_title);
 
-		$success["post_title"] = 'We Buy Houses in ' . $new_title;
+		$success["post_title"] = $new_post_title;
 		$success["post_name"] = get_the_permalink($mypost_id);
 		wp_send_json_success( $success );	
 
@@ -330,19 +338,9 @@ function toolbox_fields($type = 'text', $name, $group = false, $help = false, $o
 	return $ret;
 }
 
-add_action( 'et_after_main_content', 'webnotik_global_footer' );
-function webnotik_global_footer() {
-	if(is_single()) {
-		$divi_global = get_option('divi_global');
-
-		echo do_shortcode('<div class="divi-global">[et_pb_section global_module="'.$divi_global["blog_post_after_content"].'"][/et_pb_section]</div>');
-	}
-    
-}
-
 
 function toolbox_content($body, $tab = 'general') {
-	global $tabs;
+	$tabs = ccp_tabs();
 	$tab_group_name = 'toolbox-' .toolbox_create_slug($tab, true) . '-group';
 	?>
 	<div class="webnotik-re-wrapper">
@@ -418,7 +416,7 @@ function show_toolbox_content_callback() {
 
 function toolbox_branding_callback() {
 	$ret .= toolbox_fields('select', 'Allow Use of Branding?', 'branding', array('hint' => 'The branding below will be used only if this field is set to Yes.'), array("No","Yes"));
-	$ret = '<p>This section is deprecated. Welcome to your branding settings. Please use this page to easily change for this template.</p>';
+	$ret = '<p><span style="color:red">This section is deprecated.</span> Welcome to your branding settings. Please use this page to easily change for this template.</p>';
 
 	$ret .= toolbox_fields('select', 'Round Corners?', 'branding', false, array("No","Yes"));
 	$ret .= toolbox_fields('text', 'Round Corners PX', 'branding', array('hint' => 'add <strong>rounded_corners</strong> to module or row class.'));
@@ -493,6 +491,8 @@ function toolbox_city_pages_callback() {
 	$ret =  '<h2>Welcome to REI Toolbox City Pages Data Builder</h2>';	
 	$ret .=  '<p>This is only a data collection for all city pages for our project. To help you ease up with the development, 
 	we have functions to help you clone any page and or rename here without going to the pages.</p>';
+
+	$ret .= '<p class="global-message message"></p>';
 	
 	$ret .= toolbox_fields('text', 'Before Title', 'city_pages');
 	$ret .= toolbox_fields('text', 'After Title', 'city_pages');
@@ -524,28 +524,30 @@ function toolbox_crm_shortcode_callback() {
 
 
 	$ret = '<h3>You can create a shortcode for your Realeflow CRM here.</h3>';
-	$ret = '<h4>This function is deprecated.</h4>';
 	$ret .= toolbox_fields('text', 'Account ID', 'crm-shortcode');
 	$ret .= toolbox_fields('text', 'Assign Autoresponder', 'crm-shortcode');
 	$ret .= toolbox_fields('text', 'Redirect URL', 'crm-shortcode');
-	$ret .= toolbox_fields('select', 'Contact Type', 'crm-shortcode', false, array("Seller","Buyer"));
+	$ret .= toolbox_fields('select', 'Contact Type', 'crm-shortcode', false, array("Seller","Buyer", "Other"));
 	$ret .= toolbox_fields('text', 'Button Text', 'crm-shortcode');
 
+	$ret .= '<div class="generated-shortcode"></div>';
 
-	$ret .= get_submit_button();
+	$ret .= '<div class="options">';
+	$ret .= '<p class="submit"><a href="#" id="submit" class="button button-primary button-large generate-shortcode">Generate Shortcode</a></p>';
+	$ret .= '</div>';
 
 	echo toolbox_content($ret, 'crm-shortcode');
 }
 
 
-function toolbox_help_guidelines_callback() {
+function toolbox_shortcodes_callback() {
 	include("parsedown.php");
 	$file_path = CITYPRO_PATH . '/README.md';
 	$contents = file_get_contents( $file_path );
 	$Parsedown = new Parsedown();
 	$ret =  $Parsedown->text($contents);
 
-	echo toolbox_content($ret, 'help-guidelines');
+	echo toolbox_content($ret, 'shortcodes');
 }
 
 function toolbox_reports_callback() {
@@ -611,110 +613,168 @@ function toolbox_reports_callback() {
 	$ret .= '<p>Page Total: '. $counter.'</p>';
 
 
-	$ret .= '<h3>Forms Integration Guide</h3>';	
-	$ret .= '<table class="widefat fixed reports forms" cellspacing="0">';
+	if ( is_plugin_active( 'gravityforms/gravityforms.php' ) ) {
+	    //plugin is activated, do something
 
-	$ret .= '<thead>';
-	$ret .= '<td>Name</td>';
-	$ret .= '<td>Description</td>';
-	$ret .= '<td>Action</td>';
-	$ret .= '</thead>'; //end of TR
-
-
-	$expected_forms = array('seller', 'buyer', 'agent', 'investor', 'contact');
-	$expected_fields = array(
-		'seller' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-		'buyer' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-		'agent' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-		'investor' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-		'contact' => array("Name", "Phone Number", "Email Address", "Message", "Form URL", "Lead Source")
-	);
-
-	$forms = GFAPI::get_forms();
-    foreach ( $forms as $form) {
-
-        $ret .= '<tr>';
-		
-		
-		$match = '';
-		$client_label = '';
-		foreach ($expected_forms as $form_name) {
-			if(strpos(strtolower($form["title"]), $form_name) !== false){
-				$match = $form_name;
-				break;
-			}
+	    if(is_plugin_active("gravityformszapier/zapier.php")) {
+			$is_zapier = true;
 		}
 
 
-		$field_label = '';
-		$test_label = '';
-		if(!empty($match)){
-			// displays the types of every field in the form
-			$temp_fields = $expected_fields[$match];			
-			foreach ( $form['fields'] as $field ) {
-				$unset_label = $field->label;
-				if(($key = array_search($unset_label, $temp_fields)) !== false ) {
-					unset($temp_fields[$key]);
-					$test_label .= $field->label . ' / ';
+		$ret .= '<h3>Forms Integration Guide</h3>';	
+		$ret .= '<table class="widefat fixed reports forms" cellspacing="0">';
+
+		$ret .= '<thead>';
+		$ret .= '<td>Name</td>';
+		$ret .= '<td>Description</td>';
+
+		if($is_zapier) {
+			$ret .= '<td>Zapier</td>';
+		}
+
+
+		$ret .= '<td>Action</td>';
+		$ret .= '</thead>'; //end of TR
+
+
+		$expected_forms = array('seller', 'buyer', 'agent', 'investor', 'contact');
+		$expected_fields = array(
+			'seller' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
+			'buyer' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
+			'agent' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
+			'investor' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
+			'contact' => array("Name", "Phone Number", "Email Address", "Message", "Form URL", "Lead Source")
+		);
+
+
+
+
+
+		$forms = GFAPI::get_forms();
+	    foreach ( $forms as $form) {
+
+	        $ret .= '<tr>';
+			
+			
+			$match = '';
+			$client_label = '';
+			foreach ($expected_forms as $form_name) {
+				if(strpos(strtolower($form["title"]), $form_name) !== false){
+					$match = $form_name;
+					break;
 				}
 			}
-			if(is_array($temp_fields)) {
-				$lastfield = end($temp_fields);
-				foreach ($temp_fields as $missing_field) {
-					$field_label .= $missing_field;
 
-					if($missing_field != $lastfield) {
-						$field_label .= ', ';
+
+			$field_label = '';
+			$test_label = '';
+			if(!empty($match)){
+				// displays the types of every field in the form
+				$temp_fields = $expected_fields[$match];			
+				foreach ( $form['fields'] as $field ) {
+					$unset_label = $field->label;
+					if(($key = array_search($unset_label, $temp_fields)) !== false ) {
+						unset($temp_fields[$key]);
+						$test_label .= $field->label . ' / ';
 					}
 				}
+				if(is_array($temp_fields)) {
+					$lastfield = end($temp_fields);
+					foreach ($temp_fields as $missing_field) {
+						$field_label .= $missing_field;
+
+						if($missing_field != $lastfield) {
+							$field_label .= ', ';
+						}
+					}
+				}
+				// foreach ($temp_fields as $tf) {
+				// 	$test_label .= $tf;
+				// }
 			}
-			// foreach ($temp_fields as $tf) {
-			// 	$test_label .= $tf;
-			// }
-		}
 
-		$client_label .= (!empty($field_label)) ? '<h4>Missing Fields</h4>' . $field_label : '';
+			$client_label .= (!empty($field_label)) ? '<h4>Missing Fields</h4>' . $field_label : '';
 
-		$general = get_option("general");
-		if(!empty($general["business_owner_name"])) {
-			$client = false;
-			$notification_email = $general["notification_email"];
-			foreach ($form["notifications"] as $notification) {
-				$client	= ($notification["to"] == $notification_email) ? true : false;
-				if($client) { break; }
+			$general = get_option("general");
+			if(!empty($general["business_owner_name"])) {
+				$client = false;
+				$notification_email = $general["notification_email"];
+				foreach ($form["notifications"] as $notification) {
+					$client	= ($notification["to"] == $notification_email) ? true : false;
+					if($client) { break; }
+				}
+				if(!$client) {
+					$client_label .= '<h4>No notification assigned for this client. </h4>';
+					$client_label .= '<strong>Notification Name</strong> "Notification for '.$general["business_owner_name"].'"<br>';
+					$client_label .= '<strong>Notification Send to Email Address</strong> "'.$notification_email.'"<br>';
+				}
+			} else {
+				$client_label .= '<h4>Notication Needed!</h4>';
+				$client_label .= 'Sorry, you need to add both business owner name and notitication email in City Page Pro General Settings';
 			}
-			if(!$client) {
-				$client_label .= '<h4>No notification assigned for this client. </h4>';
-				$client_label .= '<strong>Notification Name</strong> "Notification for '.$general["business_owner_name"].'"<br>';
-				$client_label .= '<strong>Notification Send to Email Address</strong> "'.$notification_email.'"<br>';
+
+			if(!$form["enableHoneypot"]) {
+				$client_label .= '<h4>Make sure to check Enable Honeypot</h4>';
+				$client_label .= '<p>Honeypot serves as an extra security for our forms. It helps combat bot to fill out our form.</p>';
 			}
-		} else {
-			$client_label .= '<h4>Notication Needed!</h4>';
-			$client_label .= 'Sorry, you need to add both business owner name and notitication email in City Page Pro General Settings';
-		}
 
-		$ret .= '<td>'.$form['title']. (!empty($match) ? ' <span class="hot"> hot </span>' : '') .'</td>';
-		$ret .= '<td>'.$client_label.'</td>';
+			if(!$form["enableAnimation"]){
+				$client_label .= '<h4>Make sure to check Enable Animation</h4>';
+				$client_label .= '<p>Uses the loading animation when the user click the submit button.</p>';
+			}
 
-		$ret .= '<td class="actions">';
-		$ret .= ' <a href="admin.php?page=gf_edit_forms&id='.$form['id'].'">Edit</a> ';
-		$ret .= ' <a href="admin.php?page=gf_edit_forms&view=settings&id='.$form['id'].'">Settings</a> ';
-		$ret .= ' <a href="admin.php?page=gf_edit_forms&view=settings&subview=notification&id='.$form['id'].'">Notifications</a> ';
-		$ret .= '</td>';
-		$ret .= '</tr>'; //end of TR
-    }
+			
 
-	$ret .= '</table>'; //end of TABLE
+			if($match) {
+				$badge = ' <span class="hot"> hot </span>';
+			}
+
+
+
+			$ret .= '<td>'.$form['title']. (!empty($match) ? ' ' : '') . $badge .'</td>';
+			$ret .= '<td>'.$client_label.'</td>';
+
+			if($is_zapier) {
+				$form_id = $form["id"];
+				$zaps    = GFZapierData::get_feed_by_form( $form_id, true );
+				$zap_label = '';
+				if(empty($zaps)) {
+					$zap_label .= 'No Zapier feed found';
+				} else {					
+					foreach ($zaps as $zap) {
+						$zap_label .= '<h4>'.$zap["name"].'</h4>';
+						$zap_label .= '<p>'.$zap["url"].'</p>';
+					}
+				}
+				$ret .= '<td>'.$zap_label.'</td>';
+
+			}
+
+			$ret .= '<td class="actions">';
+			$ret .= ' <a href="admin.php?page=gf_edit_forms&id='.$form['id'].'">Edit</a> ';
+			$ret .= ' <a href="admin.php?page=gf_edit_forms&view=settings&id='.$form['id'].'">Settings</a> ';
+			$ret .= ' <a href="admin.php?page=gf_edit_forms&view=settings&subview=notification&id='.$form['id'].'">Notifications</a> ';
+			$ret .= '</td>';
+			$ret .= '</tr>'; //end of TR
+			
+	    }
+
+		$ret .= '</table>'; //end of TABLE
+	} //end of gravity forms
+
+
 	echo toolbox_content($ret, 'reports');
 
-
-	$to = 'nimitz@webnotik.com';
-	$subject = 'The subject';
-	$headers = array('Content-Type: text/html; charset=UTF-8', 'From: Alex &lt;alex@brightstarinvestors.com');
-	 
-	wp_mail( $to, $subject, $ret, $headers );
+	echo "<pre>";
+	print_r($zaps);
+	echo "</pre>";
+}
 
 
+function toolbox_others_callback() {
+	$ret = 'Something awesome is coming here.';
+
+	echo toolbox_content($ret, 'others');
 }
 
  

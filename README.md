@@ -75,13 +75,19 @@ power_url = required by power_name, this will link the power_name
 
 
 ###Updates 
-As of 5-13-2020 V 1.5.7
+**As of 5-15-2020 V 1.5.10**
+- added support for Before and After City Pages
+
+**As of 5-13-2020 V 1.5.9**
+- Added plugin updater
+
+**As of 5-2-2020 V 1.5.8**
 - added extra verification on the extra form.
 
-As of 5-1-2020 V 1.5.7
+**As of 5-1-2020 V 1.5.7**
 - Added 4 new extra form fields in Forms Tab to support other form types.
 
-As of 5-7-2020 V 1.5.6
+**As of 5-7-2020 V 1.5.6**
 - Update Reports tab.
 - Create a report for pages
 - Report tabs display all (recommended) pages that don't have any seo description

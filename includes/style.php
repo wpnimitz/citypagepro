@@ -1,7 +1,12 @@
 <?php
 
 $branding = get_option('branding');
-extract($branding);
+
+if(!empty($branding)) {
+	extract($branding);
+} else {
+	return false;
+}
 
 $css = '/**';
 $css .= 'Created on: ' . date("Y/m/d H:i:s");

@@ -8,75 +8,33 @@ function webnotik_form_shortcode( $atts ){
 	$type = $atts["type"];
 	$source = $atts["source"];
 
-	$allowed_types = array(
-		'seller_form', 
-		'buyer_form', 
-		'private_lending_form', 
-		'contractor_form', 
-		'realtors_form', 
-		'wholesale_form' , 
-		'contact_form', 
-		'extra_form', 
-		'extra_form_2', 
-		'extra_form_3', 
-		'extra_form_4', 
-		'extra_form_5'
-	);
+	$forms = get_option('forms');
+	$form = $forms[$type];
 
-	if(in_array($type, $allowed_types)) {
-		$forms = get_option('forms');
-		$form = $forms[$type];
+	$business_name = get_option( 'webnotik_business_name');
+	$trust_badge = get_stylesheet_directory_uri() . '/assets/img/trust-badge.jpg';
+	$allow_trust_badge = get_option( 'allow_trust_badge');
+	if($form != "") {
+		$ret = '<div class="gform_wrapper webnotik-'.$type.' webnotik-form">';
 
-		$business_name = get_option( 'webnotik_business_name');
-		$trust_badge = get_stylesheet_directory_uri() . '/assets/img/trust-badge.jpg';
-		$allow_trust_badge = get_option( 'allow_trust_badge');
-		if($form != "") {
-			$ret = '<div class="gform_wrapper webnotik-'.$type.' webnotik-form">';
-
-			if(!empty($source)) {
-				$ret .= str_replace("%source%", $source, do_shortcode($form));
-			} else {
-				if(empty($source)) {
-					$ret .= str_replace("%source%", "organic", do_shortcode($form));
-				}
-			}
-			if($allow_trust_badge == "yes") {
-				$ret .= '<img class="aligncenter trust_badge" src="'.$trust_badge.'" alt="'.$business_name.'" />';
-			}
-
-			$ret .= '</div>';
+		if(!empty($source)) {
+			$ret .= str_replace("%source%", $source, do_shortcode($form));
 		} else {
-			$ret = "Form is empty!";
+			if(empty($source)) {
+				$ret .= str_replace("%source%", "organic", do_shortcode($form));
+			}
 		}
+		if($allow_trust_badge == "yes") {
+			$ret .= '<img class="aligncenter trust_badge" src="'.$trust_badge.'" alt="'.$business_name.'" />';
+		}
+
+		$ret .= '</div>';
 	} else {
-		$ret = 'Not allowed types';
+		$ret = "Form is empty!";
 	}
-
 	return $ret;
-
-	
 }
 add_shortcode( 'webnotik_form', 'webnotik_form_shortcode' );
-
-// function webnotik_main_topics($atts) {
-// 	$atts = shortcode_atts(
-// 		array(
-// 			'display' => '4',
-// 		), $atts, 'webnotik_main_topics' );
-// 	$display = $atts["display"];
-
-// 	$main_topics = get_option( 'webnotik_main_topics');
-// 	$topics = explode(",", $main_topics);
-
-// 	$ret = '<ul class="main-topics display-'.$display.'" >';
-// 	foreach ($topics as $topic) {
-// 		$ret .= '<li>' .$topic. '</li>';
-// 	}
-// 	$ret .= '</ul>';
-
-// 	return $ret;
-// }
-// add_shortcode( 'main_topics', 'webnotik_main_topics' );
 
 function webnotik_comparison($atts) {
 	global $comparison;
@@ -112,7 +70,9 @@ function display_copyright($atts) {
 		$final_year = $year;
 	}
 
-	if(!empty($year)) {
+	if($power_name != 'Top Results Consulting') {
+		return 'Copyright &copy;' . $final_year . ' ' . get_bloginfo('name') .'. All rights reserved. Designed and Maintained by <a href="'.$power_url.'" target="_blank">'.$power_name.'</a>';
+	} else {
 		return 'Copyright &copy;' . $final_year . ' ' . get_bloginfo('name') .'. All rights reserved. Powered and Maintained by <a href="'.$power_url.'" target="_blank">'.$power_name.'</a>';
 	}
 
@@ -122,7 +82,7 @@ add_shortcode( 'footer_credits', 'display_copyright' );
 function display_divi_layout($atts) {
 	$atts = shortcode_atts(
 		array(
-			'id' => '',
+			'id' => '1',
 		), $atts, 'show_layout' );
 	$id = $atts["id"];
 
@@ -135,20 +95,23 @@ function webnotik_business_shortcode( $atts ){
 	$atts = shortcode_atts(
 		array(
 			'business' => 'weburl',
-			'text' => 'LINK',
+			'text' => '',
 		), $atts, 'webnotik' );
 	$business = $atts["business"];
 	$text = $atts["text"];
 	$ret = '';
 
-	$allowed_types = array("weburl","name", "phone_number", "email_address", "address", "address_line_1", "address_line_2", "logo_url", "business_map");
+	$allowed_types = array("weburl","name","phone_number","email_address","address", "address_line_1", "address_line_2", "logo_url", "business_map");
 
-	if(!$data = wp_cache_get('wda_' . $business, 'wda_' . $business . '_data_'. $text)) {
+	if(!$data = wp_cache_get('wda_' . $business, strtolower('wda_' . $business . '_data_'. $text)) ) {
 		if($business == "weburl") {
 
 			if(!empty($text)) {
-				$date = '<a href="'.get_site_url().'">' . $text . '</a>'; 
+				$data = '<a href="'.get_site_url().'">'.$text.'</a>';
+			} else {
+				$data = get_site_url();
 			}
+
 			wp_cache_add( 'wda_' . $business, $data, 'wda_' . $business . '_data' );
 			return $data;
 		}
@@ -266,7 +229,6 @@ add_shortcode( 'city_pages', 'webnotik_city_pages' );
 
 function webnotik_city_keywords( $atts ){
 	global $post;
-
 	//$city_keyword = get_post_meta($post->ID, 'city_keyword', true);
 	$city_name = get_post_meta($post->ID, 'city_name', true);
 
@@ -274,16 +236,14 @@ function webnotik_city_keywords( $atts ){
 		return '<span class="city city-meta">' . $city_name . '</span>';
 	} else {
 		if( !is_page() ) {
-			return '<span class="city not-page">City Name</span>';
+			return '<span class="city not-page" style="color:red">City Name</span>';
 		} else {
 			$city_pages = get_option('city_pages');
 			$main_target = $city_pages["names"][0];
-			return '<span class="city city-none">' . $main_target . '</span>';
+			return '<span class="city city-main">' . $main_target . '</span>';
 		}
 	}
-
-
-
+		
 }
 add_shortcode( 'city_keywords', 'webnotik_city_keywords' ); //needs to be deprecated
 add_shortcode( 'city_name', 'webnotik_city_keywords' );

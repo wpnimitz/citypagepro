@@ -340,6 +340,14 @@ span.hot {
   border-radius: 4px;
 }
 
+.webnotik-re-wrapper p.message.info {
+  padding: 20px 10px;
+  border: 1px solid #003f6b;
+  background: #2fa9ff;
+  border-radius: 4px;
+      color: black;
+}
+
 span.city {
   background: #e5e5e5;
   padding: 2px 5px;
@@ -423,6 +431,13 @@ span.city {
 .webnotik-re-wrapper table tr {
     border: 1px solid #ddd;
     padding: 5px;
+}
+
+
+.generated-shortcode.notice {
+    padding: 15px 30px;
+    margin-bottom: 30px;
+    margin-left: 0;
 }
 
 
