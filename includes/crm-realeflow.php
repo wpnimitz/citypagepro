@@ -16,10 +16,17 @@ function realeflow_crm_callback($atts) {
     $redirect = $atts["redirect"];
     $contact = $atts["contact"];
     $button = $atts["button"];
+    $source = $atts["button"];
 
 
     $ret = '<div class="gform_wrapper webnotik-custom webnotik-form">';
     $ret .= '<div class="message"></div>';
+
+    if($contact == 'Buyer') {
+        $action = 'https://awesome.realeflow.com/Contacts/Submit?id=117126&type=2&ar=337895&redirect='.$redirect.'&source=' . $source;
+    }
+
+
     $ret .= '
 <form name="form1" method="post" action="https://awesome.realeflow.com/Contacts/Submit" class="widget-form '.$contact.'form">
     <input name="siteId" id="siteId" type="hidden" value="'.$id.'">
