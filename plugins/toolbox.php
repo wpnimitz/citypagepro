@@ -1,8 +1,10 @@
 <?php
+$tabs = array('Branding', 'City Pages', 'Forms', 'Shortcodes', 'Others', 'Reports');
 include_once('toolbox-config.php');
 
+
 function ccp_tabs() {
-	return array('Branding', 'City Pages', 'Forms', 'Others', 'Shortcodes', 'Reports');
+	return array('Branding', 'City Pages', 'Forms', 'Shortcodes', 'Others', 'Reports');
 }
 
 // Enqueue the script on the back end (wp-admin)
@@ -338,9 +340,19 @@ function toolbox_fields($type = 'text', $name, $group = false, $help = false, $o
 	return $ret;
 }
 
+// add_action( 'et_after_main_content', 'webnotik_global_footer' );
+// function webnotik_global_footer() {
+// 	if(is_single()) {
+// 		$divi_global = get_option('divi_global');
+
+// 		echo do_shortcode('<div class="divi-global">[et_pb_section global_module="'.$divi_global["blog_post_after_content"].'"][/et_pb_section]</div>');
+// 	}
+    
+// }
+
 
 function toolbox_content($body, $tab = 'general') {
-	$tabs = ccp_tabs();
+	global $tabs;
 	$tab_group_name = 'toolbox-' .toolbox_create_slug($tab, true) . '-group';
 	?>
 	<div class="webnotik-re-wrapper">
@@ -416,7 +428,7 @@ function show_toolbox_content_callback() {
 
 function toolbox_branding_callback() {
 	$ret .= toolbox_fields('select', 'Allow Use of Branding?', 'branding', array('hint' => 'The branding below will be used only if this field is set to Yes.'), array("No","Yes"));
-	$ret = '<p><span style="color:red">This section is deprecated.</span> Welcome to your branding settings. Please use this page to easily change for this template.</p>';
+	$ret = '<p>This section is deprecated. Welcome to your branding settings. Please use this page to easily change for this template.</p>';
 
 	$ret .= toolbox_fields('select', 'Round Corners?', 'branding', false, array("No","Yes"));
 	$ret .= toolbox_fields('text', 'Round Corners PX', 'branding', array('hint' => 'add <strong>rounded_corners</strong> to module or row class.'));
@@ -524,17 +536,15 @@ function toolbox_crm_shortcode_callback() {
 
 
 	$ret = '<h3>You can create a shortcode for your Realeflow CRM here.</h3>';
+	$ret = '<h4>This function is deprecated.</h4>';
 	$ret .= toolbox_fields('text', 'Account ID', 'crm-shortcode');
 	$ret .= toolbox_fields('text', 'Assign Autoresponder', 'crm-shortcode');
 	$ret .= toolbox_fields('text', 'Redirect URL', 'crm-shortcode');
-	$ret .= toolbox_fields('select', 'Contact Type', 'crm-shortcode', false, array("Seller","Buyer", "Other"));
+	$ret .= toolbox_fields('select', 'Contact Type', 'crm-shortcode', false, array("Seller","Buyer"));
 	$ret .= toolbox_fields('text', 'Button Text', 'crm-shortcode');
 
-	$ret .= '<div class="generated-shortcode"></div>';
 
-	$ret .= '<div class="options">';
-	$ret .= '<p class="submit"><a href="#" id="submit" class="button button-primary button-large generate-shortcode">Generate Shortcode</a></p>';
-	$ret .= '</div>';
+	$ret .= get_submit_button();
 
 	echo toolbox_content($ret, 'crm-shortcode');
 }
@@ -547,7 +557,7 @@ function toolbox_shortcodes_callback() {
 	$Parsedown = new Parsedown();
 	$ret =  $Parsedown->text($contents);
 
-	echo toolbox_content($ret, 'shortcodes');
+	echo toolbox_content($ret, 'help-guidelines');
 }
 
 function toolbox_reports_callback() {
@@ -639,11 +649,11 @@ function toolbox_reports_callback() {
 
 		$expected_forms = array('seller', 'buyer', 'agent', 'investor', 'contact');
 		$expected_fields = array(
-			'seller' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-			'buyer' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-			'agent' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-			'investor' => array("Name", "Phone Number", "Email Address", "Form URL", "Lead Source"),
-			'contact' => array("Name", "Phone Number", "Email Address", "Message", "Form URL", "Lead Source")
+			'seller' => array("Full Name", "Phone Number", "Email Address", "Source URL", "Lead Source"),
+			'buyer' => array("Full Name", "Phone Number", "Email Address", "Source URL", "Lead Source"),
+			'agent' => array("Full Name", "Phone Number", "Email Address", "Source URL", "Lead Source"),
+			'investor' => array("Full Name", "Phone Number", "Email Address", "Source URL", "Lead Source"),
+			'contact' => array("Full Name", "Phone Number", "Email Address", "Message", "Source URL", "Lead Source")
 		);
 
 
